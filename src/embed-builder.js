@@ -147,9 +147,10 @@ export function buildStatusEmbed(stats, version) {
   const hours = Math.floor(uptime / 3600);
   const minutes = Math.floor((uptime % 3600) / 60);
 
-  const healthy = stats.lastSuccess && (!stats.lastError || stats.lastSuccess > stats.lastError.time);
-  const color = healthy ? 0x4caf50 : 0xf44336;
-  const statusText = healthy ? '✅ 正常' : '❌ 異常';
+  const noCallsYet = !stats.lastSuccess && !stats.lastError;
+  const healthy = noCallsYet || (stats.lastSuccess && (!stats.lastError || stats.lastSuccess > stats.lastError.time));
+  const color = noCallsYet ? 0x9e9e9e : healthy ? 0x4caf50 : 0xf44336;
+  const statusText = noCallsYet ? '⏳ 等待中' : healthy ? '✅ 正常' : '❌ 異常';
 
   const lastSuccessText = stats.lastSuccess
     ? `<t:${Math.floor(stats.lastSuccess.getTime() / 1000)}:R>`
