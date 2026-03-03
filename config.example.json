@@ -1,0 +1,16 @@
+{
+  "discord": {
+    "token": "YOUR_DISCORD_BOT_TOKEN",
+    "guildId": "YOUR_GUILD_ID",
+    "channelId": "YOUR_CHANNEL_ID"
+  },
+  "telegram": {
+    "botToken": "YOUR_TELEGRAM_BOT_TOKEN",
+    "chatId": "YOUR_CHAT_ID"
+  },
+  "schedule": {
+    "dailyPushHourJST": 0,
+    "dailyPushMinuteJST": 5,
+    "actressCheckIntervalHours": 6
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "avbuzz",
+  "version": "1.5.0",
+  "description": "Query AV new releases, rankings, and actress info from FANZA GraphQL API. No auth required.",
+  "main": "SKILL.md",
+  "author": "zxcnny930",
+  "license": "SEE LICENSE IN LICENSE",
+  "homepage": "https://github.com/zxcnny930/avbuzz",
+  "openclaw": {
+    "skills": {
+      "dependencies": {
+        "tools": ["exec", "read"],
+        "binaries": ["curl"]
+      }
+    }
+  },
+  "keywords": [
+    "fanza",
+    "av",
+    "video",
+    "releases",
+    "actress",
+    "search",
+    "ranking",
+    "graphql",
+    "discord",
+    "telegram"
+  ]
+}

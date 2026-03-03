@@ -1,0 +1,9 @@
+node_modules/
+data/
+config.json
+.claude/
+memory/
+*.pyc
+PLAN.md
+test_*.py
+docker-compose.yml
