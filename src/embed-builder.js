@@ -141,6 +141,66 @@ export function buildNewContentAlert(actress, newContents) {
   return embed;
 }
 
+export function buildStatusEmbed(stats, version) {
+  const now = new Date();
+  const uptime = process.uptime();
+  const hours = Math.floor(uptime / 3600);
+  const minutes = Math.floor((uptime % 3600) / 60);
+
+  const healthy = stats.lastSuccess && (!stats.lastError || stats.lastSuccess > stats.lastError.time);
+  const color = healthy ? 0x4caf50 : 0xf44336;
+  const statusText = healthy ? '✅ 正常' : '❌ 異常';
+
+  const lastSuccessText = stats.lastSuccess
+    ? `<t:${Math.floor(stats.lastSuccess.getTime() / 1000)}:R>`
+    : '—';
+  const lastErrorText = stats.lastError
+    ? `${stats.lastError.message}\n<t:${Math.floor(stats.lastError.time.getTime() / 1000)}:R>`
+    : '—';
+
+  return new EmbedBuilder()
+    .setColor(color)
+    .setTitle('📊 系統狀態')
+    .addFields(
+      { name: '版本', value: `v${version}`, inline: true },
+      { name: 'API 狀態', value: statusText, inline: true },
+      { name: '延遲', value: stats.lastLatencyMs ? `${stats.lastLatencyMs}ms` : '—', inline: true },
+      { name: '最後成功', value: lastSuccessText, inline: true },
+      { name: '運行時間', value: `${hours}h ${minutes}m`, inline: true },
+      { name: '最後錯誤', value: lastErrorText, inline: false },
+    )
+    .setTimestamp(now);
+}
+
+export function buildWeeklyDigestEmbeds(digest) {
+  function formatList(contents, emoji) {
+    if (!contents || contents.length === 0) return '暫無資料';
+    return contents.map((c, i) => {
+      const code = c.id.toUpperCase();
+      const actresses = formatActresses(c.actresses);
+      const review = formatReview(c.review);
+      const bookmark = c.bookmarkCount ? `♥${c.bookmarkCount}` : '';
+      const stats = [review, bookmark].filter(Boolean).join(' ');
+      return `**${i + 1}.** \`${code}\` ${c.title.slice(0, 50)}\n${actresses} ${stats}`;
+    }).join('\n\n');
+  }
+
+  return [
+    new EmbedBuilder()
+      .setColor(0xffc107)
+      .setTitle('⭐ 本週最高評分 Top 5')
+      .setDescription(formatList(digest.topRated, '⭐')),
+    new EmbedBuilder()
+      .setColor(0xe91e63)
+      .setTitle('❤️ 本週最多收藏 Top 5')
+      .setDescription(formatList(digest.topBookmarked, '❤️')),
+    new EmbedBuilder()
+      .setColor(0xff5722)
+      .setTitle('🔥 本週最暢銷 Top 5')
+      .setDescription(formatList(digest.topSelling, '🔥')),
+  ];
+}
+
 export function buildPaginationRow(currentPage, totalPages, prefix) {
   const row = new ActionRowBuilder();
 

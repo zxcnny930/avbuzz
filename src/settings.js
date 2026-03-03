@@ -10,6 +10,7 @@ const SETTINGS_FILE = join(DATA_DIR, 'settings.json');
 const DEFAULTS = {
   dailyPushEnabled: true,
   actressCheckEnabled: true,
+  weeklyDigestEnabled: true,
 };
 
 let cache = null;

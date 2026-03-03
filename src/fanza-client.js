@@ -1,5 +1,12 @@
 const API_URL = 'https://api.video.dmm.co.jp/graphql';
 
+// API health tracking
+let apiStats = { lastSuccess: null, lastError: null, lastLatencyMs: 0 };
+
+export function getApiStats() {
+  return { ...apiStats };
+}
+
 const CONTENT_FIELDS = `
   id title deliveryStartAt contentType
   maker { name }
@@ -11,6 +18,7 @@ const CONTENT_FIELDS = `
 
 async function gql(query, retries = 3) {
   for (let attempt = 1; attempt <= retries; attempt++) {
+    const start = Date.now();
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
@@ -33,8 +41,11 @@ async function gql(query, retries = 3) {
       if (data.errors) {
         throw new Error(`GraphQL error: ${data.errors[0].message}`);
       }
+      apiStats.lastSuccess = new Date();
+      apiStats.lastLatencyMs = Date.now() - start;
       return data.data;
     } catch (err) {
+      apiStats.lastError = { time: new Date(), message: err.message };
       if (attempt === retries) throw err;
       const wait = Math.min(1000 * 2 ** attempt, 10000);
       console.warn(`[FANZA] Attempt ${attempt} failed: ${err.message}, retrying in ${wait}ms...`);
@@ -221,4 +232,52 @@ export function getTodayJST() {
   const now = new Date();
   const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
   return jst.toISOString().slice(0, 10);
+}
+
+function normalizeCode(code) {
+  const match = code.match(/^([a-zA-Z]+)-?(\d+)$/);
+  if (!match) return code.toLowerCase();
+  const [, prefix, num] = match;
+  return prefix.toLowerCase() + num.padStart(5, '0');
+}
+
+export async function fetchByCode(code) {
+  const normalized = normalizeCode(code);
+  const escaped = normalized.replace(/"/g, '\\"');
+  const data = await gql(`{
+    legacySearchPPV(
+      limit: 5,
+      sort: SALES_RANK_SCORE,
+      floor: AV,
+      queryWord: "${escaped}"
+    ) {
+      result {
+        contents { ${CONTENT_FIELDS} }
+        pageInfo { totalCount }
+      }
+    }
+  }`);
+  const result = extractResults(data);
+
+  // Try to find the exact match by normalized ID
+  const exact = result.contents.find(c => c.id === normalized);
+  if (exact) {
+    return { contents: [exact], totalCount: 1 };
+  }
+
+  // Fallback: return all results so caller can show closest match
+  return result;
+}
+
+export async function fetchWeeklyDigest() {
+  const [rated, bookmarked, selling] = await Promise.all([
+    fetchRanking('review', 5),
+    fetchRanking('bookmark', 5),
+    fetchRanking('sales', 5),
+  ]);
+  return {
+    topRated: rated.contents,
+    topBookmarked: bookmarked.contents,
+    topSelling: selling.contents,
+  };
 }

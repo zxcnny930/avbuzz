@@ -126,5 +126,32 @@ export function createTelegramNotifier(botToken, chatId) {
     }
   }
 
-  return { sendMessage, sendPhoto, sendDailyDigest, sendActressAlert };
+  async function sendWeeklyDigest(digest) {
+    function formatSection(title, contents) {
+      if (!contents || contents.length === 0) return `${title}\n暫無資料`;
+      const lines = contents.map((c, i) => contentLine(c, i + 1));
+      return `${title}\n\n${lines.join('\n\n')}`;
+    }
+
+    const sections = [
+      formatSection('⭐ <b>本週最高評分 Top 5</b>', digest.topRated),
+      formatSection('❤️ <b>本週最多收藏 Top 5</b>', digest.topBookmarked),
+      formatSection('🔥 <b>本週最暢銷 Top 5</b>', digest.topSelling),
+    ];
+
+    const msg = `📊 <b>本週精選摘要</b>\n\n${sections.join('\n\n─────────────\n\n')}`;
+
+    // Split if too long
+    if (msg.length > 4000) {
+      // Send each section separately
+      await sendMessage(`📊 <b>本週精選摘要</b>`);
+      for (const section of sections) {
+        await sendMessage(section.slice(0, 4000));
+      }
+    } else {
+      await sendMessage(msg);
+    }
+  }
+
+  return { sendMessage, sendPhoto, sendDailyDigest, sendActressAlert, sendWeeklyDigest };
 }

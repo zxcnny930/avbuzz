@@ -13,7 +13,15 @@ import {
   buildActressEmbed,
   buildTrackListEmbed,
   buildPaginationRow,
+  buildStatusEmbed,
+  buildWeeklyDigestEmbeds,
 } from './embed-builder.js';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'));
 
 const SEARCH_SIZE = 5;
 
@@ -82,6 +90,18 @@ const commands = [
           { name: '❌ 關閉', value: 'off' },
         )
     ),
+  new SlashCommandBuilder()
+    .setName('status')
+    .setDescription('查看系統狀態與 API 健康'),
+  new SlashCommandBuilder()
+    .setName('code')
+    .setDescription('番號查詢')
+    .addStringOption(opt =>
+      opt.setName('id').setDescription('番號（如 SSIS-001）').setRequired(true)
+    ),
+  new SlashCommandBuilder()
+    .setName('digest')
+    .setDescription('本週精選摘要'),
 ];
 
 export async function createBot(config) {
@@ -148,6 +168,9 @@ async function handleCommand(interaction) {
     case 'untrack': return cmdUntrack(interaction);
     case 'tracklist': return cmdTracklist(interaction);
     case 'notify': return cmdNotify(interaction);
+    case 'status': return cmdStatus(interaction);
+    case 'code': return cmdCode(interaction);
+    case 'digest': return cmdDigest(interaction);
   }
 }
 
@@ -339,6 +362,37 @@ async function cmdNotify(interaction) {
   const statusLabel = enabled ? '✅ 已開啟' : '❌ 已關閉';
 
   await quickReply(interaction, `${typeLabel} — ${statusLabel}`);
+}
+
+async function cmdStatus(interaction) {
+  await interaction.deferReply().catch(e => console.log('[Bot] deferReply failed:', e.message));
+
+  const stats = fanza.getApiStats();
+  const embed = buildStatusEmbed(stats, pkg.version);
+  await sendToChannel(interaction, null, [embed]);
+}
+
+async function cmdCode(interaction) {
+  await interaction.deferReply().catch(e => console.log('[Bot] deferReply failed:', e.message));
+
+  const code = interaction.options.getString('id');
+  const result = await fanza.fetchByCode(code);
+
+  if (result.contents.length === 0) {
+    await quickReply(interaction, `❌ 找不到番號「${code}」`);
+    return;
+  }
+
+  const embed = buildContentEmbed(result.contents[0]);
+  await sendToChannel(interaction, `🔎 **${code.toUpperCase()}**`, [embed]);
+}
+
+async function cmdDigest(interaction) {
+  await interaction.deferReply().catch(e => console.log('[Bot] deferReply failed:', e.message));
+
+  const digest = await fanza.fetchWeeklyDigest();
+  const embeds = buildWeeklyDigestEmbeds(digest);
+  await sendToChannel(interaction, '📊 **本週精選摘要**', embeds);
 }
 
 // Button pagination handler

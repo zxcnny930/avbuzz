@@ -1,4 +1,4 @@
-import { buildContentEmbed, buildListEmbed, buildNewContentAlert } from './embed-builder.js';
+import { buildContentEmbed, buildListEmbed, buildNewContentAlert, buildWeeklyDigestEmbeds } from './embed-builder.js';
 
 const MAX_EMBEDS_PER_MESSAGE = 10;
 
@@ -56,5 +56,14 @@ export function createNotifier(client, channelId) {
     }
   }
 
-  return { sendDailyDigest, sendActressAlert };
+  async function sendWeeklyDigest(digest) {
+    const channel = await getChannel();
+    const embeds = buildWeeklyDigestEmbeds(digest);
+    await channel.send({
+      content: '📊 **本週精選摘要**',
+      embeds,
+    });
+  }
+
+  return { sendDailyDigest, sendActressAlert, sendWeeklyDigest };
 }

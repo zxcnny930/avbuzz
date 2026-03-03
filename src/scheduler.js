@@ -7,6 +7,7 @@ const CHECK_INTERVAL = 30_000; // 30 seconds
 let intervalId = null;
 let lastDailyPush = null;
 let lastActressCheck = null;
+let lastWeeklyDigest = null;
 
 function getNowJST() {
   const now = new Date();
@@ -61,6 +62,23 @@ export function start(notifiers, scheduleConfig) {
           await runActressCheck(notifiers);
         } catch (err) {
           console.error('[Scheduler] Actress check failed:', err.message);
+        }
+      }
+    }
+
+    // Weekly digest — every Sunday JST 20:00
+    const jstDay = jstNow.getUTCDay(); // 0 = Sunday
+    if (jstDay === 0 && jstHour === 20 && jstMinute === 0 && lastWeeklyDigest !== todayKey) {
+      lastWeeklyDigest = todayKey;
+      const weeklyEnabled = await settings.get('weeklyDigestEnabled');
+      if (weeklyEnabled === false) {
+        console.log('[Scheduler] Weekly digest skipped (disabled)');
+      } else {
+        console.log('[Scheduler] Triggering weekly digest');
+        try {
+          await runWeeklyDigest(notifiers);
+        } catch (err) {
+          console.error('[Scheduler] Weekly digest failed:', err.message);
         }
       }
     }
@@ -129,6 +147,23 @@ async function runActressCheck(notifiers) {
   }
 }
 
+async function runWeeklyDigest(notifiers) {
+  const digest = await fanza.fetchWeeklyDigest();
+  const hasContent = digest.topRated.length > 0 || digest.topBookmarked.length > 0 || digest.topSelling.length > 0;
+  if (!hasContent) {
+    console.log('[Scheduler] Weekly digest: no content');
+    return;
+  }
+  console.log(`[Scheduler] Weekly digest: ${digest.topRated.length} rated, ${digest.topBookmarked.length} bookmarked, ${digest.topSelling.length} selling`);
+  for (const n of notifiers) {
+    try {
+      await n.sendWeeklyDigest(digest);
+    } catch (err) {
+      console.error('[Scheduler] Weekly digest notifier failed:', err.message);
+    }
+  }
+}
+
 // Manual triggers for testing
 export async function triggerDailyPush(notifiers) {
   const date = fanza.getTodayJST();
@@ -137,4 +172,8 @@ export async function triggerDailyPush(notifiers) {
 
 export async function triggerActressCheck(notifiers) {
   await runActressCheck(notifiers);
+}
+
+export async function triggerWeeklyDigest(notifiers) {
+  await runWeeklyDigest(notifiers);
 }

@@ -1,6 +1,6 @@
 {
   "name": "avbuzz",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Query AV new releases, rankings, and actress info from FANZA GraphQL API. No auth required.",
   "main": "SKILL.md",
   "author": "zxcnny930",

@@ -1,7 +1,7 @@
 ---
 name: avbuzz
 description: Query AV new releases, rankings, and actress info from FANZA GraphQL API. No authentication required. Supports direct curl queries and optional Discord/Telegram bot deployment.
-version: 1.0.0
+version: 1.1.0
 user-invocable: true
 metadata:
   openclaw:
@@ -18,7 +18,7 @@ metadata:
       - darwin
       - linux
       - win32
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # AVBUZZ — FANZA AV Query Skill
@@ -334,6 +334,9 @@ All settings in `config.json`:
 | `/untrack <name>` | Stop tracking |
 | `/tracklist` | Show all tracked actresses |
 | `/random` | Random video recommendation |
+| `/status` | System status and API health check |
+| `/code <id>` | Exact video code lookup (e.g., SSIS-001) |
+| `/digest` | Weekly top picks (rating, bookmark, sales) |
 
 ### Scheduling
 
@@ -341,6 +344,7 @@ All settings in `config.json`:
 |------|-----------|-------------|
 | Daily Digest | Once/day (configurable JST time) | Top 20 new releases → Discord + Telegram |
 | Actress Check | Every 6h (configurable) | New releases for tracked actresses → alerts |
+| Weekly Digest | Sunday JST 20:00 | Top rated, bookmarked, best-selling → Discord + Telegram |
 
 ### VPS Deployment (systemd)
 
