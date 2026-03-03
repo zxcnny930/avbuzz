@@ -1,7 +1,7 @@
 ---
 name: avbuzz
 description: Query AV new releases, rankings, and actress info from FANZA GraphQL API. No authentication required. Supports direct curl queries and optional Discord/Telegram bot deployment.
-version: 1.5.0
+version: 1.0.0
 user-invocable: true
 metadata:
   openclaw:
@@ -18,7 +18,7 @@ metadata:
       - darwin
       - linux
       - win32
-  version: 1.5.0
+  version: 1.0.0
 ---
 
 # AVBUZZ — FANZA AV Query Skill
@@ -333,6 +333,7 @@ All settings in `config.json`:
 | `/track <name>` | Track actress — alerts on new releases |
 | `/untrack <name>` | Stop tracking |
 | `/tracklist` | Show all tracked actresses |
+| `/random` | Random video recommendation |
 
 ### Scheduling
 

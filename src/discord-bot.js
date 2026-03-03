@@ -61,6 +61,9 @@ const commands = [
     .setName('tracklist')
     .setDescription('列出所有追蹤的女優'),
   new SlashCommandBuilder()
+    .setName('random')
+    .setDescription('隨機推薦一部影片'),
+  new SlashCommandBuilder()
     .setName('notify')
     .setDescription('開關每日新片推送 / 女優追蹤提醒')
     .addStringOption(opt =>
@@ -140,6 +143,7 @@ async function handleCommand(interaction) {
     case 'today': return cmdToday(interaction);
     case 'ranking': return cmdRanking(interaction);
     case 'search': return cmdSearch(interaction);
+    case 'random': return cmdRandom(interaction);
     case 'track': return cmdTrack(interaction);
     case 'untrack': return cmdUntrack(interaction);
     case 'tracklist': return cmdTracklist(interaction);
@@ -253,6 +257,20 @@ async function cmdSearch(interaction) {
   await sendToChannel(interaction,
     `🔍 **${keyword}** — 共 ${result.totalCount} 筆（第 ${page}/${totalPages} 頁）`,
     embeds, components);
+}
+
+async function cmdRandom(interaction) {
+  await interaction.deferReply().catch(e => console.log('[Bot] deferReply failed:', e.message));
+
+  const result = await fanza.fetchRandom();
+
+  if (result.contents.length === 0) {
+    await quickReply(interaction, '❌ 找不到任何影片');
+    return;
+  }
+
+  const embed = buildContentEmbed(result.contents[0]);
+  await sendToChannel(interaction, '🎲 **隨機推薦**', [embed]);
 }
 
 async function cmdTrack(interaction) {

@@ -181,6 +181,42 @@ export async function searchActress(name) {
   };
 }
 
+export async function fetchRandom() {
+  // Step 1: get totalCount with limit=0
+  const countData = await gql(`{
+    legacySearchPPV(
+      limit: 1,
+      offset: 0,
+      sort: DELIVERY_START_DATE,
+      floor: AV
+    ) {
+      result {
+        pageInfo { totalCount }
+      }
+    }
+  }`);
+  const total = countData.legacySearchPPV.result.pageInfo.totalCount;
+  if (total === 0) return { contents: [], totalCount: 0 };
+
+  // Step 2: random offset (API caps at 50000), fetch 1 result
+  const maxOffset = Math.min(total - 1, 50000);
+  const offset = Math.floor(Math.random() * (maxOffset + 1));
+  const data = await gql(`{
+    legacySearchPPV(
+      limit: 1,
+      offset: ${offset},
+      sort: DELIVERY_START_DATE,
+      floor: AV
+    ) {
+      result {
+        contents { ${CONTENT_FIELDS} }
+        pageInfo { totalCount }
+      }
+    }
+  }`);
+  return extractResults(data);
+}
+
 export function getTodayJST() {
   const now = new Date();
   const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
