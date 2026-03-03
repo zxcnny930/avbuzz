@@ -9,7 +9,7 @@
   "openclaw": {
     "skills": {
       "dependencies": {
-        "tools": ["exec", "read"],
+        "tools": ["exec"],
         "binaries": ["curl"]
       }
     }
