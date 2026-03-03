@@ -20,7 +20,10 @@
 | 📈 今日熱門 | 今日新片按人氣排序 |
 | 🔍 搜尋 | 按女優名、番號、關鍵字搜尋 |
 | 🎲 隨機推薦 | 從約 28 萬部影片中隨機推薦一部 |
-| 🔔 推送開關 | 使用者可自行開關每日推送 / 女優追蹤提醒 |
+| 📊 系統狀態 | `/status` 查看 API 健康狀態、延遲、運行時間 |
+| 🔎 番號查詢 | `/code` 直接輸入番號精確查詢作品資訊 |
+| 📰 每週精選 | 每週日 JST 20:00 自動推送最高評分 / 最多收藏 / 最暢銷 Top 5 |
+| 🔔 推送開關 | 使用者可自行開關每日推送 / 女優追蹤 / 每週精選 |
 | 📱 Telegram | 同步推送到 Telegram 頻道 |
 
 ## 快速開始
@@ -75,6 +78,9 @@ Telegram 欄位留空即可只用 Discord。
 | `/track <name>` | 追蹤女優 |
 | `/untrack <name>` | 取消追蹤 |
 | `/tracklist` | 列出追蹤清單 |
+| `/status` | 查看系統狀態與 API 健康 |
+| `/code <id>` | 番號精確查詢（如 SSIS-001） |
+| `/digest` | 本週精選摘要（評分 / 收藏 / 銷售 Top 5） |
 | `/notify <daily\|actress> <on\|off>` | 開關推送通知 |
 
 ## VPS 部署 (systemd)
@@ -130,7 +136,10 @@ Query AV new releases, rankings, actress tracking, and search from FANZA's free 
 | Today's Hot | Today's releases sorted by popularity |
 | Search | By actress name, video code, or keyword |
 | Random | Random recommendation from ~280K videos |
-| Notification Toggle | Users can toggle daily push / actress alerts on/off |
+| System Status | `/status` — API health, latency, uptime |
+| Code Lookup | `/code` — exact video code search |
+| Weekly Digest | Auto-push top rated / bookmarked / best-selling Top 5 every Sunday JST 20:00 |
+| Notification Toggle | Users can toggle daily push / actress alerts / weekly digest on/off |
 | Telegram | Cross-post to Telegram channels |
 
 ## Quick Start
@@ -185,6 +194,9 @@ Leave Telegram fields empty to run Discord-only.
 | `/track <name>` | Track an actress |
 | `/untrack <name>` | Stop tracking |
 | `/tracklist` | Show tracked actresses |
+| `/status` | System status and API health |
+| `/code <id>` | Exact video code lookup (e.g., SSIS-001) |
+| `/digest` | Weekly top picks (rating / bookmark / sales Top 5) |
 | `/notify <daily\|actress> <on\|off>` | Toggle push notifications |
 
 ## VPS Deployment (systemd)
