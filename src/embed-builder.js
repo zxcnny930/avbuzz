@@ -173,33 +173,21 @@ export function buildStatusEmbed(stats, version) {
     .setTimestamp(now);
 }
 
-export function buildWeeklyDigestEmbeds(digest) {
-  function formatList(contents, emoji) {
-    if (!contents || contents.length === 0) return '暫無資料';
-    return contents.map((c, i) => {
-      const code = c.id.toUpperCase();
-      const actresses = formatActresses(c.actresses);
-      const review = formatReview(c.review);
-      const bookmark = c.bookmarkCount ? `♥${c.bookmarkCount}` : '';
-      const stats = [review, bookmark].filter(Boolean).join(' ');
-      return `**${i + 1}.** \`${code}\` ${c.title.slice(0, 50)}\n${actresses} ${stats}`;
-    }).join('\n\n');
-  }
-
-  return [
-    new EmbedBuilder()
-      .setColor(0xffc107)
-      .setTitle('⭐ 本週最高評分 Top 5')
-      .setDescription(formatList(digest.topRated, '⭐')),
-    new EmbedBuilder()
-      .setColor(0xe91e63)
-      .setTitle('❤️ 本週最多收藏 Top 5')
-      .setDescription(formatList(digest.topBookmarked, '❤️')),
-    new EmbedBuilder()
-      .setColor(0xff5722)
-      .setTitle('🔥 本週最暢銷 Top 5')
-      .setDescription(formatList(digest.topSelling, '🔥')),
+export function buildWeeklyDigestSections(digest) {
+  const sections = [
+    { color: 0xffc107, title: '⭐ 本週最高評分 Top 5', contents: digest.topRated },
+    { color: 0xe91e63, title: '❤️ 本週最多收藏 Top 5', contents: digest.topBookmarked },
+    { color: 0xff5722, title: '🔥 本週最暢銷 Top 5', contents: digest.topSelling },
   ];
+
+  return sections.map(({ color, title, contents }) => {
+    if (!contents || contents.length === 0) {
+      return [new EmbedBuilder().setColor(color).setTitle(title).setDescription('暫無資料')];
+    }
+    return contents.map((c, i) =>
+      buildContentEmbed(c, { color, rank: i + 1 })
+    );
+  });
 }
 
 export function buildPaginationRow(currentPage, totalPages, prefix) {

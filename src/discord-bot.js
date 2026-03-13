@@ -14,7 +14,7 @@ import {
   buildTrackListEmbed,
   buildPaginationRow,
   buildStatusEmbed,
-  buildWeeklyDigestEmbeds,
+  buildWeeklyDigestSections,
 } from './embed-builder.js';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -391,8 +391,16 @@ async function cmdDigest(interaction) {
   await interaction.deferReply().catch(e => console.log('[Bot] deferReply failed:', e.message));
 
   const digest = await fanza.fetchWeeklyDigest();
-  const embeds = buildWeeklyDigestEmbeds(digest);
-  await sendToChannel(interaction, '📊 **本週精選摘要**', embeds);
+  const sections = buildWeeklyDigestSections(digest);
+  const titles = ['⭐ 本週最高評分 Top 5', '❤️ 本週最多收藏 Top 5', '🔥 本週最暢銷 Top 5'];
+  const channel = await getChannel(interaction);
+  if (interaction.deferred || interaction.replied) {
+    await interaction.deleteReply().catch(() => {});
+  }
+  await channel.send({ content: '📊 **本週精選摘要**' });
+  for (let i = 0; i < sections.length; i++) {
+    await channel.send({ content: `**${titles[i]}**`, embeds: sections[i] });
+  }
 }
 
 // Button pagination handler
